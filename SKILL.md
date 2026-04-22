@@ -37,6 +37,50 @@ SpotPaper should:
 
 The output should help the user decide what to make, not just how to style it.
 
+## Invocation Modes
+
+SpotPaper supports two user-facing run modes.
+
+### 1. Default Auto Mode
+
+If the user simply asks to use SpotPaper on a draft or repo, run the workflow through to a final verdict by default.
+Do not stop at intermediate checkpoints unless there is a real blocker.
+
+Typical examples:
+
+- `Use spotpaper on this repo.`
+- `Run spotpaper on this paper and produce a figure.`
+
+In this mode, continue through:
+
+- takeaways
+- draft generation
+- image review
+- 10-second check
+- first revision when needed
+- naive-reader review
+- second revision when needed
+- final verdict
+
+### 2. Checkpoint Mode
+
+Only stop early if the user explicitly asks for a checkpoint.
+
+Typical examples:
+
+- `Use spotpaper and stop after PAPER_TAKEAWAYS.md.`
+- `Run spotpaper and stop after the first draft.`
+- `Run spotpaper and show me the 10-second check before continuing.`
+
+Supported checkpoint language includes:
+
+- `stop after PAPER_TAKEAWAYS.md`
+- `stop after draft`
+- `stop after 10-second check`
+- `stop after naive-reader review`
+
+If the user does not explicitly request a checkpoint, default to Auto Mode and keep going.
+
 ## Input Rules
 
 Assume the user may provide either:
@@ -172,6 +216,15 @@ Return the result in these four required sections:
 - What to avoid
 - Python-first recommendation
 
+For `Key numbers to retain`, do not optimize only for statistical relevance.
+Prefer numbers that are economically readable at a glance by a non-author reader.
+If a result is expressed in a form such as percentage points, log units, or another specialist scale, either:
+
+- translate it into a more directly readable magnitude for the figure, or
+- keep it out of the figure and move it to notes unless that exact form is indispensable
+
+Do not let hard-to-read units dominate a quick-read figure when a clearer economically legible quantity is available.
+
 When Python-first is clearly recommended and the user wants the skill to go further, add a fifth section:
 
 ### Python Draft Plan
@@ -183,6 +236,49 @@ When Python-first is clearly recommended and the user wants the skill to go furt
 - Implementation notes
 
 If the user asks for an actual draft, create a Python script under `scripts/` or another suitable workspace path instead of stopping at the plan.
+
+Before choosing what goes into the figure, explicitly form and preserve a short paper-distillation note.
+Store it in `PAPER_TAKEAWAYS.md` in the artifact root.
+
+That note should usually contain:
+
+- Main argument
+- Core mechanism
+- Key numbers
+- Candidate highlights
+- Selected highlights for figure
+- Deferred highlights
+- Excluded from this figure and why
+
+Use this note as the pruning layer between paper reading and figure building.
+Do not let highlight selection live only in transient reasoning.
+During later revision cycles, use `PAPER_TAKEAWAYS.md` as a reference document when deciding whether to remove, weaken, or restore elements.
+Do not treat deleted items as forgotten by default; check whether they were intentionally deferred, intentionally selected, or never justified.
+
+When selecting figure content, prefer necessity over completeness.
+Do not keep an element merely because it is useful, true, or interesting.
+Keep it only if it is necessary for this specific figure to recover the main claim quickly.
+
+Apply a single-figure budget for quick-read figures:
+
+- one main claim
+- one main structure
+- zero or one support layer
+- zero to two support numbers total
+- zero or one context strip
+
+If the current draft exceeds that budget, cut or defer elements before polishing them.
+
+Add a short figure-budget selection step between paper takeaways and figure construction.
+This step should decide:
+
+- what is required in this figure
+- what is deferred to later versions or the sidecar notes
+- what is excluded from this figure because it widens scope without sharpening the claim
+
+When this step involves choosing a scope, such as a year, period, sample slice, subgroup, or cross-section, do not pick an arbitrary or merely convenient slice.
+Choose the most representative scope for the paper's main argument.
+If a narrower scope is used, it should be because it is the clearest representative window for the claim, not simply because it is easier to draw or yields a cleaner visual.
 
 When a quantitative draft is attempted, also add:
 
@@ -223,11 +319,16 @@ Do not mark the image as effectively done if any of these remain material:
 - title, plot, or cards pushed too close to the canvas edge
 - lower support elements drifting off the horizontal centers established by the main structure
 - upper and lower sections using inconsistent alignment logic
+- information that adds reading load without strengthening the main message
 
 Do not place workflow-status or evidence-mode language in the main title area of the figure.
 Phrases such as `repo data redraw`, `figure-grounded redraw`, `composite fallback`, or `reported effects below` belong in the external writeup, generation log, or a compact source note, not in the figure's headline region.
-When a draft image is generated, prefer to store this explanatory material in an English `README.md` placed in the same artifact directory as the script and image.
-That `README.md` should carry the provenance and process notes so the figure itself can stay clean.
+When a draft image is generated, prefer to store explanatory material in two English sidecar files placed in the same artifact directory as the script and image:
+
+- `README.md` for provenance, evidence mode, review notes, and iteration history
+- `PAPER_TAKEAWAYS.md` for paper-facing content distillation
+
+Keep the figure itself clean and push process text into these sidecar files instead.
 For presentation-style figures intended to be read quickly, do not place a source note inside the figure body or footer.
 Keep provenance in the sidecar `README.md` unless the user explicitly asks for an in-figure source line.
 
@@ -239,13 +340,14 @@ Within a paper-local artifact directory, prefer this structure:
 - `current/` for the latest working script, image, and thumbnail
 - `snapshots/` for timestamped snapshots
 - a sidecar `README.md` at the artifact root for provenance and review notes
+- a sidecar `PAPER_TAKEAWAYS.md` at the artifact root for argument and highlight notes
 
 Use timestamped snapshot names rather than revision counters.
 Prefer a format such as `YYYYMMDD_HHMMSS_artifact.py` and `YYYYMMDD_HHMMSS_artifact.png`.
 
 Snapshots should preserve both the script and the main image as a pair.
 The thumbnail may remain only in `current/` unless the user explicitly wants snapshot thumbnails too.
-The sidecar `README.md` should normally track the current state rather than being duplicated for every snapshot.
+The sidecar `README.md` and `PAPER_TAKEAWAYS.md` should normally track the current state rather than being duplicated for every snapshot.
 
 `current/` files may be overwritten during iteration.
 Before a meaningful revision cycle or other milestone overwrite, create a timestamped snapshot pair in `snapshots/` whenever preservation is useful.
@@ -253,11 +355,25 @@ Before a meaningful revision cycle or other milestone overwrite, create a timest
 When a lower section is explicitly supporting an upper section, preserve cross-panel alignment.
 If bottom metrics correspond to top bars, channels, or panels, align their centers to the same horizontal logic whenever feasible.
 Do not let the upper panel and lower panel use incompatible horizontal rhythms.
+When text is strongly tied to a specific panel, keep it inside that panel's subplot whenever feasible rather than placing it at figure level.
+Reserve figure-level text for truly global elements such as the overall headline, a global subtitle, or a very light attribution mark.
 
 Title, main structure, and secondary metrics should follow a shared grid logic.
 Do not allow each zone to look internally aligned but globally misaligned.
 
 Do not assume a generated image is acceptable without reviewing it.
+
+As part of image review, explicitly check information economy:
+
+- Does each visible element help the viewer recover the main message?
+- Is any label, metric, note, or cue adding reading cost without improving understanding?
+- Is any support element repeating what the main structure already says?
+- Is any secondary element present even though it does not improve sharpness or interpretation?
+- Is any element merely useful or interesting rather than necessary for this specific figure?
+
+Do not treat a very small, low-contrast `powered by SpotPaper` attribution as an information-economy failure.
+Do not suggest deleting it by default.
+Treat it as acceptable attribution so long as it remains outside the main reading path and does not compete with the figure content.
 
 After image review, add:
 
@@ -303,16 +419,25 @@ Typical sharpening moves include:
 - clarifying the focal group or subset
 - making the main contrast more explicit
 
-After the 10-second check, add:
+If the 10-second check returns `needs_revision` or `pass_with_minor_issues`, perform a first revision before running the full naive-reader review.
+This first revision should primarily address:
+
+- hierarchy and emphasis
+- claim sharpness
+- item and message overload
+- attention landing on the wrong element
+
+After this first revision, add:
 
 ### Naive Reader Review
 
 - Perceived message
-- Likely misreadings
-- Clarity blockers
+- What confused you
+- What you could not interpret
 
 This check should be done from the perspective of a reader who sees only the image.
 Do not feed the paper abstract, the correct interpretation, or the intended main visual sentence into this check.
+Do not ask the blind reader to predict likely misreadings or act like an editor.
 When possible, execute this check with a fresh sub-agent or isolated thread that does not inherit the full conversation history.
 Close the blind-review sub-agent after the review is complete unless it is still needed for an immediate follow-up blind check in the same iteration.
 
@@ -326,6 +451,7 @@ If the verdict is `needs_revision` or `pass_with_minor_issues`, you may add:
 
 Use this section to decide whether the next revision should target presentation or meaning.
 Use `interpretation problems` not only for outright misunderstanding, but also for cases where the main message is technically correct yet still not sharp enough.
+After the naive-reader review, perform a second revision if material confusion or uninterpretable elements remain.
 
 If interpretation problems are material, you may add:
 
@@ -352,17 +478,50 @@ Use layout revision to fix presentation problems, not to change the paper's core
 Default to at most two revision rounds unless the user asks for deeper polishing.
 For presentation-style figures, preserve generous outer margins and do not rely on export-time tight cropping to define the composition.
 
+After the revision loop, run one last independent layout acceptance step:
+
+### Final Layout Check
+
+- Global grid alignment
+- Title block alignment
+- Main panel and support-block alignment
+- Card or metric block consistency
+- Connector alignment
+- Final verdict: `pass`, `pass_with_minor_issues`, or `needs_revision`
+
+This is not a repeat of the earlier generic image review.
+Use it to catch page-level layout failures that can survive local revisions, such as:
+
+- title and subtitle blocks not sharing a clean baseline logic
+- top and bottom sections using different widths or center rhythms
+- support cards drifting off the grid established by the main chart
+- connectors drawn by eye rather than by shared centers or anchors
+- locally aligned zones that still feel globally misregistered
+
+If `Final Layout Check` still finds material alignment or grid problems, do not stop.
+Continue the layout loop or report the unresolved layout defects explicitly if the revision cap has been reached.
+
 Do not stop the layout loop merely because there is no overlap.
 Continue revising if the figure is still visually crowded, hierarchically flat, or obviously workmanlike.
+Do not stop merely because the main message is roughly correct or because a naive reader mostly understands it.
+If `Image Review` still identifies material layout issues, the figure is not done.
 
 Only stop layout iteration when one of these is true:
 
 1. `Image Review = pass`
 2. `Image Review = pass_with_minor_issues`, and the remaining issues are genuinely cosmetic rather than structural
-3. the maximum revision rounds have been used, in which case report residual layout issues explicitly
+3. `Final Layout Check` does not find material grid or alignment failures
+4. the maximum revision rounds have been used, in which case report residual layout issues explicitly
 
 ## Quick-Read Structuring Rules
 
+- Prefer an argument-led headline over a descriptive numeric headline.
+- The headline should state the paper's core claim or the figure's main argument, not merely restate the visible chart values.
+- Use numbers in the headline only when the number itself is the irreducible message.
+- Otherwise, keep key numbers in the figure body and let the headline carry the claim.
+- If an abstract measure is central to the paper's contribution, name it explicitly in the figure.
+- Do not leave a core measure implicit.
+- If the measure is a main novelty or key empirical object, present its name at readable presentation strength rather than as tiny auxiliary text.
 - When a quick-read figure needs to clarify which subset or group the figure is about, prefer a compact scope line near the main structure over a vertical side label, a floating side annotation, or a boxed callout that behaves like a separate item.
 - A good default is a short scope line placed between the main structure and the secondary metric row.
 - If a label is defining the highlighted subset, bind that label to the same color family as the focal encoding whenever feasible.
@@ -388,8 +547,11 @@ Only stop layout iteration when one of these is true:
 - Do not mechanically color-match unrelated layers, such as top-panel metrics and bottom-panel logic cards, unless they truly represent the same variable or category.
 - Keep symbol meaning stable within one figure: stronger line for primary series, muted line for reference series, shaded bands for periods, arrows for summary linkage rather than automatic causality.
 - Recommend Python-first drafting when proportions or composition logic matter.
+- For presentation-style drafts, default to a 4:3 canvas unless the chosen figure grammar clearly calls for a wider, taller, or squarer ratio.
 - When generating a Python draft, prefer simple, editable `matplotlib` code over clever abstractions.
 - Numeric plots must be grounded in actual paper values, extracted figure values, or repo data. Do not interpolate a believable-looking series from prose descriptions alone.
+- When choosing support numbers, prefer economically readable magnitudes over technically faithful but cognitively heavy units.
+- Do not let percentage-point notation, log units, or similar specialist scales dominate a quick-read figure unless they are translated into a directly interpretable quantity or are truly indispensable.
 - If raw data is unavailable but the paper figure is usable, prefer a figure-grounded redraw over directly embedding a noisy screenshot.
 - Use composite fallback only when a clean redraw is not feasible in the current turn.
 - When a draft image exists, inspect it and review layout quality before calling it done.
@@ -399,7 +561,7 @@ Only stop layout iteration when one of these is true:
 - If the issue is presentation, revise layout first.
 - If the issue is understanding, revise semantic clarity without changing the core empirical claim.
 - Do not place workflow labels such as `Python-first draft` inside the main image area.
-- If attribution is needed, use a very small, light-gray `generated by SpotPaper` credit in a bottom-right whitespace area that does not collide with the main content or footnotes.
+- If attribution is needed, use a very small, light-gray `powered by SpotPaper` credit in a bottom-right whitespace area that does not collide with the main content or footnotes.
 - When image artifacts are saved, write an English `README.md` in the same folder to capture evidence mode, sources, redraw scope, review outcome, and open issues.
 - Do not let export behavior such as `bbox_inches="tight"` erase intentional margins by default.
 - For quick-read presentation figures, keep provenance out of the figure itself and in the sidecar `README.md` instead.

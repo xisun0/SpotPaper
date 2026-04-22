@@ -130,6 +130,62 @@ In the standard workflow:
 3. A first draft is created, often in Python if structure and proportions matter.
 4. The draft is later refined into a poster, mark, banner, or other visual asset.
 
+## How To Use
+
+SpotPaper can be used in two modes.
+
+### Default Mode
+
+By default, SpotPaper should keep going until it reaches a final verdict.
+That means it does not stop after the first draft unless there is a real blocker, such as missing data or unclear evidence mode.
+
+Typical usage:
+
+- `Use spotpaper on this repo.`
+- `Run spotpaper on this paper and produce a figure.`
+
+In this mode, SpotPaper will normally continue through:
+
+- paper takeaways
+- draft generation
+- image review
+- 10-second read check
+- revision 1 when needed
+- naive-reader review
+- revision 2 when needed
+- final verdict
+
+### Explicit Subagent Usage
+
+If you want the thumbnail `10-second read check` or the later `naive-reader review` to be run by isolated subagents, say so explicitly in the prompt.
+
+Recommended wording:
+
+- `Use $spotpaper and use isolated subagents for blind review.`
+- `Run $spotpaper and delegate the 10-second check and naive-reader review to subagents.`
+- `Use $spotpaper in subagent mode and regenerate the figure.`
+
+If you do not explicitly request `subagents`, `delegation`, or equivalent wording, SpotPaper may complete those review steps locally instead of spawning separate blind-review agents.
+
+### Checkpoint Mode
+
+If a user wants to inspect an intermediate stage, they should say so explicitly.
+
+Typical usage:
+
+- `Use spotpaper and stop after PAPER_TAKEAWAYS.md.`
+- `Run spotpaper and stop after the first draft.`
+- `Run spotpaper and show me the 10-second check before continuing.`
+
+Typical checkpoints are:
+
+- `PAPER_TAKEAWAYS.md`
+- first draft
+- 10-second read check
+- naive-reader review
+
+If no checkpoint is explicitly requested, SpotPaper should continue automatically.
+
 ## When Python-First Drafting Is Recommended
 
 SpotPaper should recommend a Python-first draft when the visual depends on:
