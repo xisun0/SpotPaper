@@ -219,6 +219,10 @@ Do not mark the image as effectively done if any of these remain material:
 - cramped cards, labels, or metric blocks
 - footer or attribution competing with content
 - a layout that still looks like a working draft rather than a presentation-quality figure
+- outer margins that are too thin for the composition to breathe
+- title, plot, or cards pushed too close to the canvas edge
+- lower support elements drifting off the horizontal centers established by the main structure
+- upper and lower sections using inconsistent alignment logic
 
 Do not place workflow-status or evidence-mode language in the main title area of the figure.
 Phrases such as `repo data redraw`, `figure-grounded redraw`, `composite fallback`, or `reported effects below` belong in the external writeup, generation log, or a compact source note, not in the figure's headline region.
@@ -227,9 +231,79 @@ That `README.md` should carry the provenance and process notes so the figure its
 For presentation-style figures intended to be read quickly, do not place a source note inside the figure body or footer.
 Keep provenance in the sidecar `README.md` unless the user explicitly asks for an in-figure source line.
 
+By default, save paper-specific artifacts near the paper draft or research repo rather than inside the SpotPaper skill repo itself.
+Use a paper-local artifact directory such as `spotpaper_draft/`.
+
+Within a paper-local artifact directory, prefer this structure:
+
+- `current/` for the latest working script, image, and thumbnail
+- `snapshots/` for timestamped snapshots
+- a sidecar `README.md` at the artifact root for provenance and review notes
+
+Use timestamped snapshot names rather than revision counters.
+Prefer a format such as `YYYYMMDD_HHMMSS_artifact.py` and `YYYYMMDD_HHMMSS_artifact.png`.
+
+Snapshots should preserve both the script and the main image as a pair.
+The thumbnail may remain only in `current/` unless the user explicitly wants snapshot thumbnails too.
+The sidecar `README.md` should normally track the current state rather than being duplicated for every snapshot.
+
+`current/` files may be overwritten during iteration.
+Before a meaningful revision cycle or other milestone overwrite, create a timestamped snapshot pair in `snapshots/` whenever preservation is useful.
+
+When a lower section is explicitly supporting an upper section, preserve cross-panel alignment.
+If bottom metrics correspond to top bars, channels, or panels, align their centers to the same horizontal logic whenever feasible.
+Do not let the upper panel and lower panel use incompatible horizontal rhythms.
+
+Title, main structure, and secondary metrics should follow a shared grid logic.
+Do not allow each zone to look internally aligned but globally misaligned.
+
 Do not assume a generated image is acceptable without reviewing it.
 
 After image review, add:
+
+### 10-Second Read Check
+
+- Items noticed
+- Messages perceived
+- Main message
+- What drew attention first
+
+This check should be done by a naive reader using a compressed thumbnail version of the figure rather than the full-size image.
+Use an isolated sub-agent or fresh thread when possible.
+Do not provide paper background, the intended answer, or the main visual sentence.
+Do not ask the blind reader to act like an editor. The blind reader should report what was seen, not propose changes.
+After collecting the blind reader's response, compare it against the intended main visual sentence and assess:
+
+- how many items were noticed
+- how many messages were perceived
+- whether the reader's main message aligns with the intended one
+- whether first attention landed on the intended primary structure
+- whether the reader's main message is sharp enough rather than merely broadly correct
+
+Use that comparison to assign a verdict:
+
+- `pass`
+- `pass_with_minor_issues`
+- `needs_revision`
+
+If the thumbnail does not surface the intended highlight, if it yields multiple competing messages, or if the main message is broadly correct but still too generic, treat that as a structure or emphasis failure or at least a sharpening problem.
+Save the thumbnail as an artifact in the same directory as the main image and script rather than using a disposable temp file only.
+On macOS, prefer generating the thumbnail with:
+
+- `sips -Z 320 input.png --out output_thumbnail.png`
+
+Use a default long edge of `320px` unless the user requests a different thumbnail size.
+If a dedicated blind-review sub-agent was used for this check, close it after the result is recorded unless it is immediately being reused for the next blind-review step.
+
+If the main message is directionally correct but still too generic, route the next revision toward semantic sharpening rather than only spacing or decoration fixes.
+Typical sharpening moves include:
+
+- rewriting the claim-style headline
+- shortening or sharpening the comparison labels
+- clarifying the focal group or subset
+- making the main contrast more explicit
+
+After the 10-second check, add:
 
 ### Naive Reader Review
 
@@ -240,6 +314,7 @@ After image review, add:
 This check should be done from the perspective of a reader who sees only the image.
 Do not feed the paper abstract, the correct interpretation, or the intended main visual sentence into this check.
 When possible, execute this check with a fresh sub-agent or isolated thread that does not inherit the full conversation history.
+Close the blind-review sub-agent after the review is complete unless it is still needed for an immediate follow-up blind check in the same iteration.
 
 If the verdict is `needs_revision` or `pass_with_minor_issues`, you may add:
 
@@ -250,6 +325,7 @@ If the verdict is `needs_revision` or `pass_with_minor_issues`, you may add:
 - Chosen revision path
 
 Use this section to decide whether the next revision should target presentation or meaning.
+Use `interpretation problems` not only for outright misunderstanding, but also for cases where the main message is technically correct yet still not sharp enough.
 
 If interpretation problems are material, you may add:
 
@@ -274,6 +350,7 @@ If layout problems are material, you may add:
 
 Use layout revision to fix presentation problems, not to change the paper's core visual logic.
 Default to at most two revision rounds unless the user asks for deeper polishing.
+For presentation-style figures, preserve generous outer margins and do not rely on export-time tight cropping to define the composition.
 
 Do not stop the layout loop merely because there is no overlap.
 Continue revising if the figure is still visually crowded, hierarchically flat, or obviously workmanlike.
@@ -283,6 +360,18 @@ Only stop layout iteration when one of these is true:
 1. `Image Review = pass`
 2. `Image Review = pass_with_minor_issues`, and the remaining issues are genuinely cosmetic rather than structural
 3. the maximum revision rounds have been used, in which case report residual layout issues explicitly
+
+## Quick-Read Structuring Rules
+
+- When a quick-read figure needs to clarify which subset or group the figure is about, prefer a compact scope line near the main structure over a vertical side label, a floating side annotation, or a boxed callout that behaves like a separate item.
+- A good default is a short scope line placed between the main structure and the secondary metric row.
+- If a label is defining the highlighted subset, bind that label to the same color family as the focal encoding whenever feasible.
+- Secondary metrics are optional. For quick-read figures, default to zero to two secondary metrics total.
+- When the figure is built around a left/right main comparison, use at most one secondary metric per side.
+- Keep secondary metrics clearly smaller and weaker than the main comparison numbers.
+- If secondary metrics begin to form a second headline, weaken or remove them.
+- Connector text should be weaker than the main labels and may be omitted entirely.
+- If a connector label is repeatedly noticed in the 10-second check but does not improve message sharpness, reduce or remove the connector text while keeping the structural connector itself when useful.
 
 ## Working Style
 
@@ -304,6 +393,7 @@ Only stop layout iteration when one of these is true:
 - If raw data is unavailable but the paper figure is usable, prefer a figure-grounded redraw over directly embedding a noisy screenshot.
 - Use composite fallback only when a clean redraw is not feasible in the current turn.
 - When a draft image exists, inspect it and review layout quality before calling it done.
+- Treat outer whitespace as part of readability, not decoration.
 - When a draft image exists, test whether a naive reader can understand the intended message from the image alone, preferably via an isolated sub-agent with no paper background.
 - Triage failures into layout problems and interpretation problems before revising.
 - If the issue is presentation, revise layout first.
@@ -311,6 +401,10 @@ Only stop layout iteration when one of these is true:
 - Do not place workflow labels such as `Python-first draft` inside the main image area.
 - If attribution is needed, use a very small, light-gray `generated by SpotPaper` credit in a bottom-right whitespace area that does not collide with the main content or footnotes.
 - When image artifacts are saved, write an English `README.md` in the same folder to capture evidence mode, sources, redraw scope, review outcome, and open issues.
+- Do not let export behavior such as `bbox_inches="tight"` erase intentional margins by default.
 - For quick-read presentation figures, keep provenance out of the figure itself and in the sidecar `README.md` instead.
+- Run a thumbnail-based `10-Second Read Check` before the fuller naive-reader review.
+- Use the thumbnail check to test whether the main highlight survives compression and first-glance reading.
+- Save the thumbnail artifact alongside the figure so the quick-read check is reproducible.
 
 If the paper is too abstract, too diffuse, or not empirically anchored enough for a strong dataviz concept, say so clearly and recommend a more restrained direction.
