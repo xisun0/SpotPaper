@@ -513,6 +513,23 @@ Only stop layout iteration when one of these is true:
 3. `Final Layout Check` does not find material grid or alignment failures
 4. the maximum revision rounds have been used, in which case report residual layout issues explicitly
 
+## Optional Image Polish Stage
+
+If the user explicitly requests a polish pass — for example by saying `use image2`, `polish this figure`, `make it presentation-grade`, or `do a visual refinement pass` — read and execute `IMAGE2_POLISH.md`.
+
+This stage is image-to-image only. Do not return to the Python script.
+
+Before entering this stage, confirm:
+
+- the figure has completed the main SpotPaper review cycle
+- `Image Review` or `Final Layout Check` has returned `pass` or `pass_with_minor_issues`
+- the current reviewed image file path is known and available
+
+Hand off the reviewed image file to the IMAGE2 polish workflow.
+Do not re-render from Python unless the polish stage identifies a structural problem that cannot be resolved at the image level, in which case flag it explicitly rather than silently returning to code.
+
+After `Final Layout Check` returns `pass` or `pass_with_minor_issues`, mention that an optional IMAGE2 polish pass is available and can be triggered by saying `use image2`.
+
 ## Quick-Read Structuring Rules
 
 - Prefer an argument-led headline over a descriptive numeric headline.

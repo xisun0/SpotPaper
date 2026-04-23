@@ -17,6 +17,23 @@ Only use it when the user explicitly asks for a second-stage visual refinement s
 
 If the user does not explicitly ask for polish, stop at the normal SpotPaper draft/review cycle.
 
+## Stage Type
+
+This is an image-to-image stage.
+
+The input is a reviewed image file produced by the main SpotPaper workflow.
+This stage does not return to Python code or re-render from a script.
+
+If a structural problem is found that cannot be resolved at the image level, flag it explicitly and stop rather than silently switching back to code.
+
+## Prerequisites
+
+Do not enter this stage unless all of the following are true:
+
+- the figure has completed the main SpotPaper review cycle
+- `Image Review` or `Final Layout Check` returned `pass` or `pass_with_minor_issues`
+- the current reviewed image file path is known and available
+
 ## Purpose
 
 The goal of `image2` polish is not to redesign the figure's argument.
@@ -97,6 +114,63 @@ Questions to ask:
 - Does the figure feel presentation-grade rather than draft-like?
 - Is the visual language consistent across panels?
 - Has polish improved the figure without adding decorative noise?
+
+## Execution
+
+After completing the three-step analysis, execute the polish in this order:
+
+### 1. Compile the edit prompt
+
+Merge all findings from structure, typography, and visual polish into a single, concrete English prompt.
+
+Rules:
+- Use action verbs: `remove`, `soften`, `reduce`, `replace`, `lighten`
+- Only describe what to change, not what to keep
+- Always append: "Preserve the small 'powered by SpotPaper' attribution in the bottom-right corner."
+- Keep it under 200 words
+
+### 2. Snapshot the current image
+
+Before generating, copy the current image to `snapshots/` with a timestamp:
+
+```bash
+cp current/<figure>.png snapshots/$(date +%Y%m%d_%H%M%S)_<figure>.png
+```
+
+### 3. Call GPT Image 2 edit
+
+```bash
+python3 <skill-root>/scripts/image2_edit.py \
+  -i current/<figure>.png \
+  -o current/<figure>_polish.png \
+  -p "<compiled edit prompt>"
+```
+
+`<skill-root>` is the root directory of this skill repo — the directory containing this file and `SKILL.md`. In Claude Code it is `$CLAUDE_PLUGIN_ROOT`; in Codex it is resolved by the skill installer. Claude should infer the full path from where it loaded this file.
+
+The output is always a new file. The input image is never overwritten.
+
+Output naming convention: append `_polish` to the original stem.
+Example: `rf2023_spotpaper.png` → `rf2023_spotpaper_polish.png`
+
+Do not overwrite the original Python-generated figure. The `_polish` file is a separate artifact and should remain distinct from the main figure.
+
+Requires `OPENAI_API_KEY` in environment or `~/.env`.
+
+### 4. Generate thumbnail
+
+```bash
+sips -Z 320 current/<figure>_polish.png --out current/<figure>_polish_thumbnail.png
+```
+
+### 5. Review the result
+
+Read the output image and confirm:
+- The intended changes were applied
+- No new structural problems were introduced
+- The main message is clearer than before
+
+Report any residual issues.
 
 ## Guardrails
 

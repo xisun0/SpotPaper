@@ -1,0 +1,21 @@
+{
+  "name": "spotpaper",
+  "description": "Turn an empirical paper draft or research repo into a dataviz-based visual concept. Identifies the core visualizable argument, recommends a visual grammar, and produces a draft figure brief. Includes an image-to-image polish stage (IMAGE2) powered by GPT Image 2.",
+  "version": "0.1.1",
+  "author": {
+    "name": "xi sun",
+    "url": "https://github.com/xisun0"
+  },
+  "homepage": "https://github.com/xisun0/SpotPaper",
+  "repository": "https://github.com/xisun0/SpotPaper",
+  "license": "MIT",
+  "keywords": [
+    "research",
+    "dataviz",
+    "paper",
+    "visualization",
+    "figure",
+    "social-science",
+    "gpt-image-2"
+  ]
+}

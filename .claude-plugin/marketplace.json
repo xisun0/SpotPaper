@@ -1,0 +1,16 @@
+{
+  "name": "xisun0-skills",
+  "owner": {
+    "name": "xi sun",
+    "url": "https://github.com/xisun0"
+  },
+  "plugins": [
+    {
+      "name": "spotpaper",
+      "source": "./",
+      "description": "Turn an empirical paper draft or research repo into a dataviz-based visual concept. Identifies the core visualizable argument, recommends a visual grammar, and produces a draft figure brief.",
+      "homepage": "https://github.com/xisun0/SpotPaper",
+      "keywords": ["research", "dataviz", "paper", "visualization", "figure", "social-science", "gpt-image-2"]
+    }
+  ]
+}
