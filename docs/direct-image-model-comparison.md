@@ -22,7 +22,7 @@ This is a fair baseline: it asks for the same end product without giving the mod
 
 | Direct image baseline | SpotPaper |
 | --- | --- | 
-| ![cantoni2014](../showcase/cantoni2014/current/ChatGPT_Image.png) | ![cantoni2014](../showcase/cantoni2014/current/curriculum_spotpaper_polish.png) |
+| ![cantoni2014](../showcase/qjz042/current/ChatGPT_Image.png) | ![cantoni2014](../showcase/qjz042/current/qjz042_spotpaper_polish.png) |
 
 ## What SpotPaper Adds
 
