@@ -1,234 +1,125 @@
 # SpotPaper
 
-SpotPaper is a product for turning the core argument of an empirical paper project into a clear, dataviz-based visual concept.
+Turn an empirical paper into a presentation-ready figure — argument first.
 
-It is designed for cases where a paper has a strong empirical claim, but the mechanism or contrast is hard to communicate quickly to non-specialists. SpotPaper helps identify what should be visualized, which visual grammar fits best, and what a first draft should emphasize.
+---
 
-## Product Purpose
+## Showcase
 
-SpotPaper helps researchers, designers, and research teams move from:
+<!-- showcase figures go here -->
 
-- a paper draft or research repo
+---
 
-to:
+## Install
 
-- a clear visual direction that is faithful to the paper
-- a recommended dataviz grammar
-- a concise visual sentence
-- a draft brief that can be used for design or prototyping
+**Claude Code**
 
-The product is not meant to replace final visual design. Its purpose is to improve the quality of visual decisions at the concept stage.
+```
+/plugin marketplace add xisun0/SpotPaper
+```
 
-## Target Use Cases
+**Codex**
 
-SpotPaper is best suited for:
+```
+$skill-installer https://github.com/xisun0/SpotPaper/tree/main/skills/spotpaper
+```
 
-- empirical social-science papers
-- economics, finance, political economy, public policy, and adjacent fields
-- papers with a clear main finding
-- papers where a contrast, mechanism, or channel can be visually structured
+### Prerequisites
+ No extra install needed for baseline figure generation beyond what Claude Code or Codex already provides. But if you want to use the polish pass, you will need to set up the OpenAI API and install the Python dependencies.
 
-Typical use cases include:
+```bash
+pip install openai python-dotenv
+```
 
-- creating a visual concept for a paper-based poster
-- designing a dataviz-style mark for a paper summary
-- preparing a visual brief before drafting a figure or graphic
-- translating a draft paper or research repo into a communication-ready visual idea
+Add your OpenAI API key to `~/.env`: `OPENAI_API_KEY=sk-...`
 
-## Non-Target Use Cases
 
-SpotPaper is not optimized for:
+---
 
-- purely theoretical papers
-- papers without a clear empirical result
-- generic branding or logo generation unrelated to the paper's argument
-- illustration-first tasks where style matters more than analytic structure
+## What It Does
 
-## Product Approach
+SpotPaper reads a paper draft or research repo and produces a figure centered on the paper's core argument, not just its topic.
 
-SpotPaper does not try to literally illustrate abstract academic concepts such as incentives, expectations, selection, or coordination.
+It identifies what should be visualized, chooses a visual grammar that fits the mechanism, drafts the figure, and runs a blind-reader review before stopping.
 
-Instead, it converts them into visual structure.
-
-The product typically works with visual grammars such as:
-
-- flow
-- gate
-- funnel
-- prism
-- split
-- divergence
-- layered mechanism
-- composition shift
-
-The main objective is to visualize the argument, not just the topic.
-
-## Inputs
-
-### Primary Input
-
-SpotPaper is intended to work from one of these sources:
-
-- a paper draft
-- a research repo
-
-### What SpotPaper Looks For
-
-From that input, SpotPaper extracts the material needed to identify the visualizable argument, such as:
-
-- title
-- abstract
-- introduction
-- results sections
-- figures or tables
-- notes about the intended audience or output
-
-### Optional
-
-- preferred output type: `mark`, `poster`, `banner`, or `auto`
-- user notes
-
-## Outputs
-
-SpotPaper V1 returns four structured outputs after reading the draft or repo context.
-
-### 1. Paper Essence
-
-A compressed reading of the paper, including:
-
-- one-sentence claim
-- core mechanism
-- main contrast
-- key result
-
-### 2. Visual Recommendation
-
-A recommendation for the most appropriate visual grammar, with a short explanation of why it fits the paper.
-
-### 3. Main Visual Sentence
-
-A single sentence describing what the final visual should communicate.
-
-This is the central output of the workflow.
-
-### 4. Draft Brief
-
-A concrete draft direction, including:
-
-- suggested layout
-- key numbers to retain
-- what to emphasize
-- what to avoid
-- whether a Python-first dataviz draft is recommended
-
-## Recommended Workflow
-
-In the standard workflow:
-
-1. SpotPaper reads the paper draft or repo and identifies the core visualizable argument.
-2. SpotPaper recommends a visual grammar and produces a draft brief.
-3. A first draft is created, often in Python if structure and proportions matter.
-4. The draft is later refined into a poster, mark, banner, or other visual asset.
+Best suited for empirical social-science papers — economics, finance, political economy, public policy — where the main finding involves a contrast, channel, or mechanism that can be drawn as structure.
 
 ## How To Use
 
-SpotPaper can be used in two modes.
+Give SpotPaper a paper or repo. It runs through to a final figure without stopping.
 
-### Default Mode
+### 1. Baseline version
 
-By default, SpotPaper should keep going until it reaches a final verdict.
-That means it does not stop after the first draft unless there is a real blocker, such as missing data or unclear evidence mode.
+**Input options:**
+- A local PDF or draft file
+- A local research repo
+- A URL
 
-Typical usage:
+**Demo prompt:**
 
-- `Use spotpaper on this repo.`
-- `Run spotpaper on this paper and produce a figure.`
+```
+Use spotpaper on /path/to/paper.pdf
+Use spotpaper on <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3114038>
+Use spotpaper on this repo <repo_directory>
+```
+<!-- 
+SpotPaper will:
 
-In this mode, SpotPaper will normally continue through:
+1. Read the paper and extract the core argument
+2. Choose a visual grammar (flow, gate, split, divergence, etc.)
+3. Write a Python figure script and render a draft
+4. Run a blind 10-second read check on a thumbnail
+5. Revise if needed, then run a naive-reader review
+6. Stop when the figure passes layout and interpretation review -->
 
-- paper takeaways
-- draft generation
-- image review
-- 10-second read check
-- revision 1 when needed
-- naive-reader review
-- revision 2 when needed
-- final verdict
+Output is saved to a `spotpaper_draft/` folder next to the paper:
 
-### Explicit Subagent Usage
+```
+spotpaper_draft/
+  current/
+    <figure>.py           ← editable matplotlib script
+    <figure>.png          ← rendered figure
+    <figure>_thumbnail.png
+  snapshots/            ← timestamped backups of each revision
+  PAPER_TAKEAWAYS.md
+  README.md
+```
 
-If you want the thumbnail `10-second read check` or the later `naive-reader review` to be run by isolated subagents, say so explicitly in the prompt.
+The `.py` script is plain `matplotlib` — you can open it and adjust colors, labels, layout, or numbers directly before re-running.
 
-Recommended wording:
+### 2. Polished version (optional)
 
-- `Use $spotpaper and use isolated subagents for blind review.`
-- `Run $spotpaper and delegate the 10-second check and naive-reader review to subagents.`
-- `Use $spotpaper in subagent mode and regenerate the figure.`
+After the figure passes review, SpotPaper will prompt you.
 
-If you do not explicitly request `subagents`, `delegation`, or equivalent wording, SpotPaper may complete those review steps locally instead of spawning separate blind-review agents.
+If you are in the same session:
+```
+use image2 to continue polishing the current figure
+```
 
-### Checkpoint Mode
+If you are starting a new session, specify the file explicitly:
 
-If a user wants to inspect an intermediate stage, they should say so explicitly.
+```
+Use spotpaper to polish spotpaper_draft/current/figure.png
+```
 
-Typical usage:
+This runs a [`gpt-image-2`](https://platform.openai.com/docs/guides/image-generation) polish pass on the figure — tightening layout, typography, and visual weight without touching the data or argument. Output is saved as `<figure>_polish.png` alongside the original.
 
-- `Use spotpaper and stop after PAPER_TAKEAWAYS.md.`
-- `Run spotpaper and stop after the first draft.`
-- `Run spotpaper and show me the 10-second check before continuing.`
+> Note: The polish pass calls the OpenAI API and incurs usage costs. At the default setting, each call costs approximately $0.17. See [OpenAI API Pricing](https://openai.com/api/pricing/) for details.
 
-Typical checkpoints are:
 
-- `PAPER_TAKEAWAYS.md`
-- first draft
-- 10-second read check
-- naive-reader review
 
-If no checkpoint is explicitly requested, SpotPaper should continue automatically.
 
-## When Python-First Drafting Is Recommended
+**Stop at a checkpoint:**
 
-SpotPaper should recommend a Python-first draft when the visual depends on:
+```
+Use spotpaper on this paper and stop after the first draft.
+Use spotpaper on this repo and stop after PAPER_TAKEAWAYS.md.
+```
 
-- real proportions
-- strong empirical contrasts
-- area or width encoding
-- careful layout logic
+## Principles
 
-This is especially important when the intended output behaves more like a compressed data visualization than a stylized illustration.
-
-## Example
-
-For a paper draft or repo arguing that industrial policy shapes IPO access in China, SpotPaper may produce:
-
-- Paper Essence: policy changes who enters the IPO pipeline
-- Visual Recommendation: use a gate, prism, or composition-shift structure
-- Main Visual Sentence: favored industries occupy a much larger share of IPO access than their baseline economic share
-- Draft Brief: compare GDP share, IPO gate selection, and IPO share in one vertically structured dataviz mark
-
-## Product Principles
-
-SpotPaper follows these product principles:
-
-- visualize the argument, not just the topic
-- draw structure, not abstract nouns
-- keep one dominant visual sentence
-- use key numbers selectively
-- prefer clarity over decoration
-- avoid cliché academic imagery unless it clearly improves comprehension
-
-## Version Scope
-
-SpotPaper is currently a V1 product.
-
-V1 focuses on:
-
-- identifying the right visualizable argument
-- selecting a suitable visual grammar
-- producing a usable draft brief
-
-V1 does not aim to fully automate polished final graphics.
-
-## Short Description
-
-SpotPaper turns a paper draft or research repo into a clear dataviz-based visual concept centered on the paper's core mechanism and key result.
+- Visualize the argument, not just the topic
+- Draw structure, not abstract nouns
+- One dominant visual sentence per figure
+- Numbers only when they are the irreducible message
+- Clarity over decoration
