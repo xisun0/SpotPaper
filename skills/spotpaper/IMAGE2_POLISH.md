@@ -117,7 +117,22 @@ Questions to ask:
 
 ## Execution
 
-After completing the three-step analysis, execute the polish in this order:
+After completing the three-step analysis, check whether the user wants API execution or prompt-only output.
+
+### Prompt-only mode
+
+If the user says any of the following, skip steps 2–5 and only output the compiled edit prompt:
+
+- `use image2 prompt only`
+- `show me the polish prompt`
+- `generate the polish prompt without calling the API`
+- or any equivalent wording indicating they want the prompt text only
+
+In this mode, output the compiled edit prompt as a copyable text block and stop. The user can paste it into ChatGPT, DALL-E, or any compatible image editor manually. No API call is made and no files are written.
+
+### API execution mode
+
+Otherwise, proceed through all steps below.
 
 ### 1. Compile the edit prompt
 

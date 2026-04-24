@@ -1,0 +1,8 @@
+.DS_Store
+**/.DS_Store
+
+# Showcase work products: keep only final polished figures in git.
+showcase/**/snapshots/
+showcase/**/*.py
+showcase/**/*_thumbnail.png
+showcase/**/*_thumb.png
